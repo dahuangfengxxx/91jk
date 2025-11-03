@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食疗菜谱 - 专业中医食疗智能推荐平台</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 加载指示器 -->
+    <div id="loadingIndicator" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>正在加载食疗数据库...</p>
+        </div>
+    </div>
+
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <span class="logo-text">食疗菜谱</span>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul class="nav-list">
+                        <li><a href="#recipes" class="nav-link active" data-tab="recipes">菜谱大全</a></li>
+                        <li><a href="#ingredients" class="nav-link" data-tab="ingredients">食材百科</a></li>
+                        <li><a href="#analytics" class="nav-link" data-tab="analytics">数据洞察</a></li>
+                        <li><a href="#favorites" class="nav-link" data-tab="favorites">我的收藏</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-actions">
+                    <button id="themeToggle" class="icon-btn" title="切换主题">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="exportData" class="icon-btn" title="导出数据">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="main">
+        <!-- 英雄区域 -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">专业中医食疗智能推荐</h1>
+                    <p class="hero-subtitle">基于传统中医理论，为您推荐最适合的食疗菜谱和养生食材</p>
+                    
+                    <!-- 搜索栏 -->
+                    <div class="hero-search">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="mainSearch" placeholder="搜索菜谱、食材或功效..." class="search-input">
+                            <button type="button" id="mainSearchBtn" class="search-btn">搜索</button>
+                        </div>
+                        
+                        <!-- 快速筛选标签 -->
+                        <div class="quick-filters">
+                            <span class="filter-label">热门标签:</span>
+                            <button class="filter-tag" data-filter="补气血">补气血</button>
+                            <button class="filter-tag" data-filter="养胃">养胃</button>
+                            <button class="filter-tag" data-filter="润肺">润肺</button>
+                            <button class="filter-tag" data-filter="滋阴">滋阴</button>
+                            <button class="filter-tag" data-filter="温阳">温阳</button>
+                            <button class="filter-tag" data-filter="清热">清热</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 高级搜索面板 -->
+        <section id="advancedSearchPanel" class="advanced-search-panel">
+            <div class="container">
+                <div class="search-panel-content">
+                    <div class="search-tabs">
+                        <button class="search-tab active" data-search-type="recipes">
+                            <i class="fas fa-utensils"></i>
+                            <span>菜谱搜索</span>
+                        </button>
+                        <button class="search-tab" data-search-type="ingredients">
+                            <i class="fas fa-leaf"></i>
+                            <span>食材搜索</span>
+                        </button>
+                        <button class="search-tab" data-search-type="advanced">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>高级筛选</span>
+                        </button>
+                    </div>
+
+                    <!-- 菜谱搜索表单 -->
+                    <div id="recipes-search" class="search-form active">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>搜索关键词</label>
+                                <input type="text" id="recipeSearch" placeholder="菜谱名称、功效、适用人群...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>菜系</label>
+                                <select id="cuisineFilter">
+                                    <option value="">所有菜系</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>难度</label>
+                                <select id="difficultyFilter">
+                                    <option value="">所有难度</option>
+                                    <option value="简单">简单</option>
+                                    <option value="中等">中等</option>
+                                    <option value="困难">困难</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>制作时间</label>
+                                <select id="timeFilter">
+                                    <option value="">不限时间</option>
+                                    <option value="15">15分钟内</option>
+                                    <option value="30">30分钟内</option>
+                                    <option value="60">1小时内</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" id="searchRecipes" class="btn btn-primary">
+                            <i class="fas fa-search"></i> 搜索菜谱
+                        </button>
+                    </div>
+
+                    <!-- 食材搜索表单 -->
+                    <div id="ingredients-search" class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>搜索关键词</label>
+                                <input type="text" id="ingredientSearch" placeholder="食材名称、功效、性味...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>分类</label>
+                                <select id="categoryFilter">
+                                    <option value="">所有分类</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>功效</label>
+                                <select id="effectFilter">
+                                    <option value="">所有功效</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>适用季节</label>
+                                <select id="seasonFilter">
+                                    <option value="">四季皆宜</option>
+                                    <option value="春">春季</option>
+                                    <option value="夏">夏季</option>
+                                    <option value="秋">秋季</option>
+                                    <option value="冬">冬季</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" id="searchIngredients" class="btn btn-primary">
+                            <i class="fas fa-search"></i> 搜索食材
+                        </button>
+                    </div>
+
+                    <!-- 高级筛选表单 -->
+                    <div id="advanced-search" class="search-form">
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label>体质类型</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="气虚">
+                                        <span>气虚体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="阳虚">
+                                        <span>阳虚体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="阴虚">
+                                        <span>阴虚体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="痰湿">
+                                        <span>痰湿体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="湿热">
+                                        <span>湿热体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="血瘀">
+                                        <span>血瘀体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="气郁">
+                                        <span>气郁体质</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="平和">
+                                        <span>平和体质</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>症状或疾病</label>
+                                <input type="text" id="symptomsInput" placeholder="如：咳嗽、失眠、消化不良...">
+                            </div>
+                            <div class="form-group">
+                                <label>禁忌人群</label>
+                                <input type="text" id="contraindicationsInput" placeholder="如：孕妇、高血压、糖尿病...">
+                            </div>
+                        </div>
+                        <button type="button" id="advancedSearch" class="btn btn-primary">
+                            <i class="fas fa-search"></i> 智能匹配
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 内容区域 -->
+        <section class="content-section">
+            <div class="container">
+                <!-- 菜谱页面 -->
+                <div id="recipes-content" class="content-page active">
+                    <div class="page-header">
+                        <h2>推荐菜谱</h2>
+                        <div class="header-actions">
+                            <div class="sort-control">
+                                <label>排序方式:</label>
+                                <select id="recipeSort">
+                                    <option value="name">按名称</option>
+                                    <option value="difficulty">按难度</option>
+                                    <option value="time">按时间</option>
+                                    <option value="popularity">按热度</option>
+                                </select>
+                            </div>
+                            <button id="toggleAdvancedSearch" class="btn btn-outline">
+                                <i class="fas fa-filter"></i> 高级筛选
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="recipeResults" class="recipe-grid">
+                        <!-- 动态内容 -->
+                    </div>
+                    
+                    <div id="recipePagination" class="pagination">
+                        <!-- 分页控件 -->
+                    </div>
+                </div>
+
+                <!-- 食材页面 -->
+                <div id="ingredients-content" class="content-page">
+                    <div class="page-header">
+                        <h2>食材百科</h2>
+                        <div class="header-actions">
+                            <div class="sort-control">
+                                <label>排序方式:</label>
+                                <select id="ingredientSort">
+                                    <option value="name">按名称</option>
+                                    <option value="category">按分类</option>
+                                    <option value="effect">按功效</option>
+                                </select>
+                            </div>
+                            <button id="toggleAdvancedSearch2" class="btn btn-outline">
+                                <i class="fas fa-filter"></i> 高级筛选
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="ingredientResults" class="ingredient-grid">
+                        <!-- 动态内容 -->
+                    </div>
+                    
+                    <div id="ingredientPagination" class="pagination">
+                        <!-- 分页控件 -->
+                    </div>
+                </div>
+
+                <!-- 数据分析页面 -->
+                <div id="analytics-content" class="content-page">
+                    <div class="page-header">
+                        <h2>数据洞察</h2>
+                        <p class="page-description">深入了解食疗数据库的统计信息和趋势分析</p>
+                    </div>
+                    
+                    <div class="analytics-dashboard">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalRecipes">0</h3>
+                                    <p>食疗菜谱</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalIngredients">0</h3>
+                                    <p>养生食材</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalCategories">0</h3>
+                                    <p>食材分类</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalEffects">0</h3>
+                                    <p>功效类型</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="charts-grid">
+                            <div class="chart-card">
+                                <h3>食材分类分布</h3>
+                                <div class="chart-container">
+                                    <canvas id="categoryChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>功效分布统计</h3>
+                                <div class="chart-container">
+                                    <canvas id="effectChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 收藏夹页面 -->
+                <div id="favorites-content" class="content-page">
+                    <div class="page-header">
+                        <h2>我的收藏</h2>
+                        <div class="header-actions">
+                            <button id="clearFavorites" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> 清空收藏
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="favoritesResults" class="favorites-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3>还没有收藏内容</h3>
+                            <p>在浏览菜谱或食材时点击收藏按钮，将它们添加到这里</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="关闭">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modalBody" class="modal-body">
+                <!-- 动态内容 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div id="toastContainer" class="toast-container">
+        <!-- 动态通知 -->
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/dataManager.js"></script>
+    <script src="assets/js/searchEngine.js"></script>
+    <script src="assets/js/components.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随息居 · 智能食疗检索平台</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=3">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=3">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+</head>
+<body class="light-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <h1>随息居</h1>
+                    <span class="subtitle">智能食疗检索平台</span>
+                </div>
+                <div class="header-controls">
+                    <button id="theme-toggle" class="theme-toggle" title="切换主题">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="favorites-btn" class="favorites-btn" title="收藏夹">
+                        <i class="fas fa-heart"></i>
+                        <span id="favorites-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-target="search-panel">
+                    <i class="fas fa-search"></i>
+                    <span>智能检索</span>
+                </button>
+                <button class="nav-tab" data-target="ingredients-panel">
+                    <i class="fas fa-leaf"></i>
+                    <span>食材库</span>
+                </button>
+                <button class="nav-tab" data-target="recipes-panel">
+                    <i class="fas fa-utensils"></i>
+                    <span>配方库</span>
+                </button>
+                <button class="nav-tab" data-target="herbs-panel">
+                    <i class="fas fa-mortar-pestle"></i>
+                    <span>药材库</span>
+                </button>
+                <button class="nav-tab" data-target="seasonings-panel">
+                    <i class="fas fa-pepper-hot"></i>
+                    <span>调味库</span>
+                </button>
+                <button class="nav-tab" data-target="analysis-panel">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>数据分析</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="fas fa-seedling fa-spin"></i>
+                    <p>正在加载数据...</p>
+                </div>
+            </div>
+
+            <!-- Search Panel -->
+            <section id="search-panel" class="content-panel active">
+                <div class="search-header">
+                    <h2>智能检索</h2>
+                    <p>支持多维度、智能化的食疗配方检索</p>
+                </div>
+
+                <div class="search-form card">
+                    <div class="search-grid">
+                        <div class="search-field span-2">
+                            <label for="global-search">关键词检索</label>
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="global-search" placeholder="输入食材名称、功效、体质类型等..." />
+                                <button id="search-btn" class="search-button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="search-field">
+                            <label for="constitution-filter">体质类型</label>
+                            <select id="constitution-filter">
+                                <option value="">全部体质</option>
+                                <option value="气虚">气虚质</option>
+                                <option value="阳虚">阳虚质</option>
+                                <option value="阴虚">阴虚质</option>
+                                <option value="痰湿">痰湿质</option>
+                                <option value="湿热">湿热质</option>
+                                <option value="血虚">血虚质</option>
+                                <option value="气郁">气郁质</option>
+                                <option value="血瘀">血瘀质</option>
+                                <option value="平和">平和质</option>
+                            </select>
+                        </div>
+
+                        <div class="search-field">
+                            <label for="season-filter">适宜季节</label>
+                            <select id="season-filter">
+                                <option value="">全年适宜</option>
+                                <option value="春">春季</option>
+                                <option value="夏">夏季</option>
+                                <option value="秋">秋季</option>
+                                <option value="冬">冬季</option>
+                                <option value="四季">四季皆宜</option>
+                            </select>
+                        </div>
+
+                        <div class="search-field">
+                            <label for="qi-filter">四气性味</label>
+                            <select id="qi-filter">
+                                <option value="">不限性味</option>
+                                <option value="寒">寒性</option>
+                                <option value="凉">凉性</option>
+                                <option value="平">平性</option>
+                                <option value="温">温性</option>
+                                <option value="热">热性</option>
+                            </select>
+                        </div>
+
+                        <div class="search-field">
+                            <label for="flavor-filter">五味分类</label>
+                            <select id="flavor-filter">
+                                <option value="">不限五味</option>
+                                <option value="酸">酸味</option>
+                                <option value="甜">甜味</option>
+                                <option value="苦">苦味</option>
+                                <option value="辛">辛味</option>
+                                <option value="咸">咸味</option>
+                            </select>
+                        </div>
+
+                        <div class="search-actions span-2">
+                            <button id="advanced-search" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                开始检索
+                            </button>
+                            <button id="clear-search" class="btn btn-secondary">
+                                <i class="fas fa-eraser"></i>
+                                清空条件
+                            </button>
+                            <button id="save-search" class="btn btn-outline">
+                                <i class="fas fa-save"></i>
+                                保存检索
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div class="results-section">
+                    <div class="results-header">
+                        <h3>检索结果</h3>
+                        <div class="results-controls">
+                            <span id="results-count" class="results-count">共找到 0 条结果</span>
+                            <div class="view-controls">
+                                <button id="grid-view" class="view-btn active" title="网格视图">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button id="list-view" class="view-btn" title="列表视图">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                            <select id="sort-results" class="sort-select">
+                                <option value="relevance">相关性排序</option>
+                                <option value="name">名称排序</option>
+                                <option value="category">分类排序</option>
+                                <option value="favorites">收藏数排序</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="search-results" class="results-grid"></div>
+                    <div id="pagination" class="pagination"></div>
+                </div>
+            </section>
+
+            <!-- Ingredients Panel -->
+            <section id="ingredients-panel" class="content-panel">
+                <div class="panel-header">
+                    <h2>食材数据库</h2>
+                    <p>浏览和管理食材信息，了解各种食材的性味归经</p>
+                </div>
+
+                <div class="filter-bar card">
+                    <div class="filter-grid">
+                        <div class="filter-field">
+                            <label for="ing-category">食材分类</label>
+                            <select id="ing-category">
+                                <option value="">全部分类</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="ing-subcategory">子分类</label>
+                            <select id="ing-subcategory">
+                                <option value="">全部子类</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="ing-qi">四气</label>
+                            <select id="ing-qi">
+                                <option value="">不限</option>
+                                <option value="寒">寒</option>
+                                <option value="凉">凉</option>
+                                <option value="平">平</option>
+                                <option value="温">温</option>
+                                <option value="热">热</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="ing-flavor">五味</label>
+                            <select id="ing-flavor">
+                                <option value="">不限</option>
+                                <option value="酸">酸</option>
+                                <option value="甜">甜</option>
+                                <option value="苦">苦</option>
+                                <option value="辛">辛</option>
+                                <option value="咸">咸</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="apply-ing-filter" class="btn btn-primary">应用筛选</button>
+                            <button id="reset-ing-filter" class="btn btn-secondary">重置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="results-header">
+                        <h3>食材列表</h3>
+                        <div class="results-controls">
+                            <span id="ing-count" class="results-count">共 0 种食材</span>
+                        </div>
+                    </div>
+                    <div id="ingredients-results" class="results-grid"></div>
+                </div>
+            </section>
+
+            <!-- Recipes Panel -->
+            <section id="recipes-panel" class="content-panel">
+                <div class="panel-header">
+                    <h2>配方数据库</h2>
+                    <p>浏览各种食疗配方，了解制作方法和适用体质</p>
+                </div>
+
+                <div class="filter-bar card">
+                    <div class="filter-grid">
+                        <div class="filter-field span-2">
+                            <label for="recipe-search">配方搜索</label>
+                            <input type="text" id="recipe-search" placeholder="搜索配方名称或功效..." />
+                        </div>
+                        <div class="filter-field">
+                            <label for="recipe-constitution">适宜体质</label>
+                            <select id="recipe-constitution">
+                                <option value="">全部体质</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="recipe-season">适宜季节</label>
+                            <select id="recipe-season">
+                                <option value="">全年</option>
+                                <option value="春">春季</option>
+                                <option value="夏">夏季</option>
+                                <option value="秋">秋季</option>
+                                <option value="冬">冬季</option>
+                                <option value="四季">四季</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="apply-recipe-filter" class="btn btn-primary">应用筛选</button>
+                            <button id="reset-recipe-filter" class="btn btn-secondary">重置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="results-header">
+                        <h3>配方列表</h3>
+                        <div class="results-controls">
+                            <span id="recipe-count" class="results-count">共 0 个配方</span>
+                        </div>
+                    </div>
+                    <div id="recipes-results" class="results-grid"></div>
+                </div>
+            </section>
+
+            <!-- Herbs Panel -->
+            <section id="herbs-panel" class="content-panel">
+                <div class="panel-header">
+                    <h2>药材库</h2>
+                    <p>传统中药材的功效与应用</p>
+                </div>
+
+                <div class="filters-section card">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="herbs-category">药材分类</label>
+                            <select id="herbs-category">
+                                <option value="">全部分类</option>
+                                <option value="补益药">补益药</option>
+                                <option value="清热药">清热药</option>
+                                <option value="祛湿药">祛湿药</option>
+                                <option value="活血药">活血药</option>
+                                <option value="安神药">安神药</option>
+                                <option value="消食药">消食药</option>
+                                <option value="理气药">理气药</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="herbs-constitution">适用体质</label>
+                            <select id="herbs-constitution">
+                                <option value="">全部体质</option>
+                                <option value="气虚">气虚质</option>
+                                <option value="阳虚">阳虚质</option>
+                                <option value="阴虚">阴虚质</option>
+                                <option value="痰湿">痰湿质</option>
+                                <option value="湿热">湿热质</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="herbs-nature">药性</label>
+                            <select id="herbs-nature">
+                                <option value="">不限药性</option>
+                                <option value="寒">寒性</option>
+                                <option value="凉">凉性</option>
+                                <option value="平">平性</option>
+                                <option value="温">温性</option>
+                                <option value="热">热性</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="herbs-taste">药味</label>
+                            <select id="herbs-taste">
+                                <option value="">不限药味</option>
+                                <option value="酸">酸味</option>
+                                <option value="甜">甜味</option>
+                                <option value="苦">苦味</option>
+                                <option value="辛">辛味</option>
+                                <option value="咸">咸味</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="results-header">
+                        <div class="results-info">
+                            <span id="herbs-count">共找到 0 种药材</span>
+                        </div>
+                        <div class="view-controls">
+                            <button id="herbs-grid-view" class="view-btn active">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button id="herbs-list-view" class="view-btn">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="herbs-results" class="results-grid"></div>
+                </div>
+            </section>
+
+            <!-- Seasonings Panel -->
+            <section id="seasonings-panel" class="content-panel">
+                <div class="panel-header">
+                    <h2>调味库</h2>
+                    <p>各类调味料的特性与搭配</p>
+                </div>
+
+                <div class="filters-section card">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="seasonings-category">调味分类</label>
+                            <select id="seasonings-category">
+                                <option value="">全部分类</option>
+                                <option value="香料">香料类</option>
+                                <option value="调味">调味类</option>
+                                <option value="酱料">酱料类</option>
+                                <option value="油脂">油脂类</option>
+                                <option value="醋类">醋类</option>
+                                <option value="盐类">盐类</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="seasonings-origin">来源产地</label>
+                            <select id="seasonings-origin">
+                                <option value="">不限产地</option>
+                                <option value="本土">本土调料</option>
+                                <option value="进口">进口调料</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="seasonings-taste">味道特点</label>
+                            <select id="seasonings-taste">
+                                <option value="">不限味道</option>
+                                <option value="咸">咸味</option>
+                                <option value="甜">甜味</option>
+                                <option value="酸">酸味</option>
+                                <option value="辣">辣味</option>
+                                <option value="香">香味</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="seasonings-usage">使用方式</label>
+                            <select id="seasonings-usage">
+                                <option value="">不限用法</option>
+                                <option value="炒制">炒制用</option>
+                                <option value="炖煮">炖煮用</option>
+                                <option value="凉拌">凉拌用</option>
+                                <option value="腌制">腌制用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="results-header">
+                        <div class="results-info">
+                            <span id="seasonings-count">共找到 0 种调味料</span>
+                        </div>
+                        <div class="view-controls">
+                            <button id="seasonings-grid-view" class="view-btn active">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button id="seasonings-list-view" class="view-btn">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="seasonings-results" class="results-grid"></div>
+                </div>
+            </section>
+
+            <!-- Analysis Panel -->
+            <section id="analysis-panel" class="content-panel">
+                <div class="panel-header">
+                    <h2>数据统计分析</h2>
+                    <p>深入了解食疗数据的分布和关联性</p>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="analysis-card card">
+                        <h3>食材分类分布</h3>
+                        <canvas id="category-chart"></canvas>
+                    </div>
+                    <div class="analysis-card card">
+                        <h3>四气性味分布</h3>
+                        <canvas id="qi-chart"></canvas>
+                    </div>
+                    <div class="analysis-card card">
+                        <h3>体质适配统计</h3>
+                        <canvas id="constitution-chart"></canvas>
+                    </div>
+                    <div class="analysis-card card">
+                        <h3>季节性分布</h3>
+                        <canvas id="season-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats-cards">
+                    <div class="stat-card card">
+                        <div class="stat-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="total-ingredients">0</h4>
+                            <p>食材总数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="total-recipes">0</h4>
+                            <p>配方总数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="total-categories">0</h4>
+                            <p>分类总数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4 id="total-favorites">0</h4>
+                            <p>收藏总数</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button id="modal-favorite" class="btn btn-outline">
+                    <i class="fas fa-heart"></i>
+                    收藏
+                </button>
+                <button id="modal-share" class="btn btn-outline">
+                    <i class="fas fa-share"></i>
+                    分享
+                </button>
+                <button class="btn btn-secondary modal-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="assets/js/config.js?v=3"></script>
+    <script src="assets/js/simpleDataManager.js?v=3"></script>
+    <script src="assets/js/simpleApp.js?v=3"></script>
+</body>
+</html>
