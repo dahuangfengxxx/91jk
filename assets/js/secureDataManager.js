@@ -62,14 +62,18 @@ class SecureDataManager {
             ];
             
             const hostname = window.location.hostname;
+            console.log('🔍 验证请求来源:', hostname);
+            
             const isAllowed = allowedDomains.some(domain => 
                 hostname === domain || hostname.endsWith('.' + domain)
-            );
+            ) || hostname === '' || hostname.includes('127.0.0.1');
             
             if (!isAllowed) {
                 console.warn('Unauthorized domain access attempt:', hostname);
                 return false;
             }
+            
+            console.log('✅ 请求来源验证通过');
         }
         return true;
     }
@@ -181,6 +185,11 @@ class SecureDataManager {
             
             this.isLoaded = true;
             this.showLoading(false);
+            
+            // 触发数据加载完成事件
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('dataLoaded', { detail: this }));
+            }
             
             return true;
             

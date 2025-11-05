@@ -60,7 +60,117 @@
     font-size: 0.9em;
 }
 
-/* 兼容性标签样式优化 */
+/* 卡片属性样式 */
+.card-properties {
+    margin: 10px 0;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border-left: 3px solid #22c55e;
+}
+
+.property-item {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+    font-size: 0.85em;
+}
+
+.property-item i {
+    margin-right: 6px;
+    color: #22c55e;
+    width: 14px;
+}
+
+.property-label {
+    font-weight: 500;
+    color: #64748b;
+    margin-right: 4px;
+}
+
+.property-value {
+    color: #334155;
+    font-weight: 500;
+}
+
+/* 相宜相克预览样式 */
+.card-compatibility {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.compatibility-good .compatibility-label {
+    color: #166534;
+    font-weight: 500;
+}
+
+.compatibility-bad .compatibility-label {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.pairing-preview {
+    color: #64748b;
+}
+
+/* 详情页相宜相克样式 */
+.compatibility-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.compatibility-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.compatibility-item {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid;
+}
+
+.compatibility-item.good {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.compatibility-item.bad {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.compatibility-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.compatibility-item.good .compatibility-label {
+    color: #166534;
+}
+
+.compatibility-item.bad .compatibility-label {
+    color: #dc2626;
+}
+
+.compatibility-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.compatibility-tag {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
 .compatibility-tag.good {
     background: #dcfce7;
     color: #166534;
@@ -71,6 +181,122 @@
     background: #fef2f2;
     color: #dc2626;
     border: 1px solid #fecaca;
+}
+
+/* 用量网格样式 */
+.dosage-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.dosage-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border-left: 3px solid #3b82f6;
+}
+
+.dosage-label {
+    font-weight: 500;
+    color: #64748b;
+    margin-right: 8px;
+}
+
+.dosage-value {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* 相关配方样式 */
+.recipes-grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.recipe-link {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: #334155;
+}
+
+.recipe-link:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-link::before {
+    content: "🥘";
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.recipe-link:hover::before {
+    content: "👨‍🍳";
+}
+
+/* 配料清单样式 */
+.ingredients-section {
+    background: #fef7e7;
+    border: 1px solid #f3e8d3;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.ingredients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.ingredient-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.ingredient-card:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ingredient-header h5 {
+    margin: 0 0 8px 0;
+    font-size: 1em;
+    font-weight: 600;
+    color: #374151;
+}
+
+.ingredient-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ingredient-amount {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.ingredient-notes {
+    font-size: 0.8em;
+    color: #9ca3af;
+    font-style: italic;
 }
 
 /* 结果卡片样式 */

@@ -34,6 +34,22 @@ class SimpleApp {
             this.isInitialized = true;
             console.log('Simple App initialized successfully');
             
+            // 监听数据加载完成事件
+            window.addEventListener('dataLoaded', () => {
+                console.log('Data loaded event received, displaying popular ingredients');
+                setTimeout(() => {
+                    this.displayPopularIngredients();
+                }, 100);
+            });
+            
+            // 如果数据已经加载完成，直接显示
+            if (dataManager.isLoaded) {
+                console.log('Data already loaded, displaying popular ingredients immediately');
+                setTimeout(() => {
+                    this.displayPopularIngredients();
+                }, 500);
+            }
+            
         } catch (error) {
             console.error('Failed to initialize app:', error);
         }
@@ -142,8 +158,10 @@ class SimpleApp {
             clearBtn.addEventListener('click', () => this.clearSearch());
         }
         
-        // 显示常用食材
-        this.displayPopularIngredients();
+        // 延迟显示常用食材，确保数据已加载
+        setTimeout(() => {
+            this.displayPopularIngredients();
+        }, 500);
     }
 
     /**
@@ -151,6 +169,12 @@ class SimpleApp {
      */
     displayPopularIngredients() {
         console.log('Displaying popular ingredients...');
+        console.log('Available ingredients count:', dataManager.ingredients.length);
+        
+        // 检查西红柿是否存在
+        const tomato = dataManager.ingredients.find(item => item.name_zh === '西红柿');
+        console.log('西红柿 found in data:', tomato);
+        
         const popularIngredients = [
             '虾', '羊肉', '牛肉', '猪肉', '鸡肉', '鸡蛋',
             '白菜', '土豆', '西红柿', '西兰花', '胡萝卜', '菠菜',
@@ -194,6 +218,11 @@ class SimpleApp {
         resultsContainer.classList.add('results-grid');
         resultsContainer.classList.remove('list-view');
         console.log('Applied results-grid class to container');
+        
+        // 绑定卡片点击事件
+        setTimeout(() => {
+            this.bindResultCards();
+        }, 100);
     }
 
     /**
@@ -213,12 +242,12 @@ class SimpleApp {
                     </p>
                     <p class="card-description">暂无详细信息</p>
                 </div>
-                <div class="card-actions">
-                    <button class="btn btn-outline btn-sm" onclick="app.showDetails('${name}', 'ingredient')">
+                <div class="card-actions" onclick="event.stopPropagation()">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${name.replace(/'/g, "\\'")}', 'ingredient'); event.stopPropagation();">
                         <i class="fas fa-eye"></i>
                         查看详情
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="app.toggleFavorite('${name}')">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${name.replace(/'/g, "\\'")}'); event.stopPropagation();">
                         <i class="fas fa-heart"></i>
                         收藏
                     </button>
@@ -425,8 +454,10 @@ class SimpleApp {
         resultsContainer.classList.add('results-grid');
         resultsContainer.classList.remove('list-view');
         
-        // 绑定卡片点击事件
-        this.bindResultCards();
+        // 延迟绑定事件，确保DOM更新完成
+        setTimeout(() => {
+            this.bindResultCards();
+        }, 100);
     }
 
     /**
@@ -463,27 +494,31 @@ class SimpleApp {
         
         // 获取相宜相克信息（仅对食材显示）
         let compatibilityHtml = '';
-        if (!isRecipe && item.pairings_good) {
-            const goodPairings = item.pairings_good.split(',').slice(0, 3).join('、');
-            compatibilityHtml += `
-                <div class="card-compatibility">
-                    <span class="compatibility-label">相宜：</span>
-                    <span class="pairing-good-preview">${goodPairings}</span>
-                </div>
-            `;
+        if (!isRecipe && (item.pairing_good || item.pairings_good)) {
+            const goodPairings = (item.pairing_good || item.pairings_good || '').split(/[;,]/).slice(0, 3).join('、');
+            if (goodPairings) {
+                compatibilityHtml += `
+                    <div class="card-compatibility">
+                        <span class="compatibility-label">相宜：</span>
+                        <span class="pairing-good-preview">${goodPairings}</span>
+                    </div>
+                `;
+            }
         }
-        if (!isRecipe && item.pairings_bad) {
-            const badPairings = item.pairings_bad.split(',').slice(0, 3).join('、');
-            compatibilityHtml += `
-                <div class="card-compatibility">
-                    <span class="compatibility-label">相克：</span>
-                    <span class="pairing-bad-preview">${badPairings}</span>
-                </div>
-            `;
+        if (!isRecipe && (item.pairing_bad || item.pairings_bad)) {
+            const badPairings = (item.pairing_bad || item.pairings_bad || '').split(/[;,]/).slice(0, 3).join('、');
+            if (badPairings) {
+                compatibilityHtml += `
+                    <div class="card-compatibility">
+                        <span class="compatibility-label">相克：</span>
+                        <span class="pairing-bad-preview">${badPairings}</span>
+                    </div>
+                `;
+            }
         }
         
         return `
-            <div class="result-card" data-type="${isRecipe ? 'recipe' : 'ingredient'}" data-name="${title}" onclick="app.showDetails('${title}', '${isRecipe ? 'recipe' : 'ingredient'}')">
+            <div class="result-card" data-type="${isRecipe ? 'recipe' : 'ingredient'}" data-name="${title}">
                 <div class="card-header">
                     <h3 class="card-title">${title}</h3>
                     <span class="card-type">${type}</span>
@@ -493,6 +528,22 @@ class SimpleApp {
                         <i class="fas fa-tag"></i>
                         ${category}
                     </p>
+                    
+                    ${!isRecipe ? `
+                        <div class="card-properties">
+                            <div class="property-item">
+                                <i class="fas fa-thermometer-half"></i>
+                                <span class="property-label">四气五味：</span>
+                                <span class="property-value">${item.four_qi || '未知'} / ${item.five_flavors || '未知'}</span>
+                            </div>
+                            <div class="property-item">
+                                <i class="fas fa-route"></i>
+                                <span class="property-label">归经：</span>
+                                <span class="property-value">${item.meridians || '未知'}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
                     ${description ? `<p class="card-description">${description}</p>` : ''}
                     ${constitutions ? `
                         <p class="card-constitutions">
@@ -509,7 +560,11 @@ class SimpleApp {
                     ${compatibilityHtml}
                 </div>
                 <div class="card-actions" onclick="event.stopPropagation()">
-                    <button class="btn btn-outline btn-sm" onclick="app.toggleFavorite('${title}')">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${title.replace(/'/g, "\\'")}', '${isRecipe ? 'recipe' : 'ingredient'}'); event.stopPropagation();">
+                        <i class="fas fa-eye"></i>
+                        查看详情
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${title.replace(/'/g, "\\'")}'); event.stopPropagation();">
                         <i class="fas fa-heart"></i>
                         收藏
                     </button>
@@ -524,20 +579,36 @@ class SimpleApp {
     bindResultCards() {
         const cards = document.querySelectorAll('.result-card');
         cards.forEach(card => {
+            // 移除旧的事件监听器
+            card.replaceWith(card.cloneNode(true));
+        });
+        
+        // 重新绑定事件
+        const newCards = document.querySelectorAll('.result-card');
+        newCards.forEach(card => {
             card.addEventListener('click', (e) => {
-                if (e.target.closest('.card-actions')) return;
+                // 防止按钮点击事件冲突
+                if (e.target.closest('.card-actions')) {
+                    e.stopPropagation();
+                    return;
+                }
                 
                 const name = card.dataset.name;
                 const type = card.dataset.type;
+                console.log('Card clicked:', name, type); // 调试日志
                 this.showDetails(name, type);
             });
         });
+        
+        console.log('Bound events to', newCards.length, 'cards'); // 调试日志
     }
 
     /**
      * 显示详情
      */
     showDetails(name, type) {
+        console.log('🔍 showDetails called with:', name, type); // 调试日志
+        
         let item;
         let content = '';
         
@@ -548,11 +619,16 @@ class SimpleApp {
             item = dataManager.recipes.find(r => r.title_zh === name);
             if (item) {
                 const ingredients = dataManager.getRecipeIngredients(name);
+                console.log(`🥘 配方"${name}"配料数据:`, ingredients);
                 const ingredientsList = ingredients.map(ing => 
-                    `<div class="ingredient-item">
-                        <span class="ingredient-name">${ing.ingredient_name_zh}</span>
-                        <span class="ingredient-amount">${ing.amount}</span>
-                        ${ing.note ? `<span class="ingredient-note">${ing.note}</span>` : ''}
+                    `<div class="ingredient-card">
+                        <div class="ingredient-header">
+                            <h5>${ing.ingredient_name_zh}</h5>
+                        </div>
+                        <div class="ingredient-body">
+                            <div class="ingredient-amount">${ing.amount || '适量'}</div>
+                            ${ing.notes && ing.notes.trim() ? `<div class="ingredient-notes">${ing.notes}</div>` : ''}
+                        </div>
                     </div>`
                 ).join('');
                 
@@ -625,13 +701,18 @@ class SimpleApp {
             item = dataManager.ingredients.find(i => i.name_zh === name);
             if (item) {
                 const relatedRecipes = dataManager.getIngredientRecipes(name);
-                const recipesList = relatedRecipes.map(recipe => 
-                    `<div class="recipe-link" onclick="app.showRelatedRecipe('${recipe.title_zh}', 'recipe')">${recipe.title_zh}</div>`
-                ).join('');
+                console.log(`🍽️ ${name} 相关配方数量:`, relatedRecipes.length);
+                const recipesList = relatedRecipes.map(recipe => {
+                    const recipeTitle = recipe.title_zh || recipe['菜谱名称'] || recipe.name;
+                    return `<div class="recipe-link" onclick="window.app.showRelatedRecipe('${recipeTitle.replace(/'/g, "\\'")}', 'recipe'); event.stopPropagation();">${recipeTitle}</div>`;
+                }).join('');
                 
                 // 相宜相克信息
                 let compatibilitySection = '';
-                if (item.pairings_good || item.pairings_bad) {
+                const goodPairings = item.pairing_good || item.pairings_good || '';
+                const badPairings = item.pairing_bad || item.pairings_bad || '';
+                
+                if (goodPairings || badPairings) {
                     compatibilitySection = `
                         <div class="detail-section compatibility-section">
                             <div class="section-header">
@@ -639,19 +720,19 @@ class SimpleApp {
                                 <h4>相宜相克</h4>
                             </div>
                             <div class="compatibility-grid">
-                                ${item.pairings_good ? `
+                                ${goodPairings ? `
                                     <div class="compatibility-item good">
                                         <div class="compatibility-label">相宜</div>
                                         <div class="compatibility-list">
-                                            ${item.pairings_good.split(',').map(item => `<span class="compatibility-tag good">${item.trim()}</span>`).join('')}
+                                            ${goodPairings.split(/[;,]/).map(item => `<span class="compatibility-tag good">${item.trim()}</span>`).join('')}
                                         </div>
                                     </div>
                                 ` : ''}
-                                ${item.pairings_bad ? `
+                                ${badPairings ? `
                                     <div class="compatibility-item bad">
                                         <div class="compatibility-label">相克</div>
                                         <div class="compatibility-list">
-                                            ${item.pairings_bad.split(',').map(item => `<span class="compatibility-tag bad">${item.trim()}</span>`).join('')}
+                                            ${badPairings.split(/[;,]/).map(item => `<span class="compatibility-tag bad">${item.trim()}</span>`).join('')}
                                         </div>
                                     </div>
                                 ` : ''}
@@ -663,7 +744,10 @@ class SimpleApp {
                 content = `
                     <div class="detail-header">
                         <div class="detail-badge ingredient-badge">食材</div>
-                        <div class="category-info">${item.gate_category || '未分类'}</div>
+                        <div class="detail-tags">
+                            ${item.gate_category ? `<span class="tag">${item.gate_category}</span>` : ''}
+                            ${item.subcategory ? `<span class="tag">${item.subcategory}</span>` : ''}
+                        </div>
                     </div>
                     
                     <div class="detail-grid">
@@ -695,6 +779,16 @@ class SimpleApp {
                         <div class="function-content">${item.primary_functions || '暂无信息'}</div>
                     </div>
                     
+                    ${item.indications ? `
+                        <div class="detail-section">
+                            <div class="section-header">
+                                <i class="fas fa-stethoscope"></i>
+                                <h4>主治</h4>
+                            </div>
+                            <div class="indications-content">${item.indications}</div>
+                        </div>
+                    ` : ''}
+                    
                     <div class="detail-section">
                         <div class="section-header">
                             <i class="fas fa-user-md"></i>
@@ -707,14 +801,55 @@ class SimpleApp {
                         </div>
                     </div>
                     
+                    ${item.constitutions_caution ? `
+                        <div class="detail-section">
+                            <div class="section-header">
+                                <i class="fas fa-user-times"></i>
+                                <h4>体质注意</h4>
+                            </div>
+                            <div class="caution-content">${item.constitutions_caution}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="detail-section">
+                        <div class="section-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h4>适用季节</h4>
+                        </div>
+                        <p class="season-info">${item.seasonality || '四季皆宜'}</p>
+                    </div>
+                    
                     ${compatibilitySection}
+                    
+                    ${item.prep_methods ? `
+                        <div class="detail-section">
+                            <div class="section-header">
+                                <i class="fas fa-cogs"></i>
+                                <h4>制作方法</h4>
+                            </div>
+                            <div class="method-content">${item.prep_methods}</div>
+                        </div>
+                    ` : ''}
                     
                     <div class="detail-section">
                         <div class="section-header">
                             <i class="fas fa-prescription-bottle"></i>
                             <h4>用法用量</h4>
                         </div>
-                        <div class="dosage-content">${item.dosage_note || '暂无信息'}</div>
+                        <div class="dosage-grid">
+                            ${item.dietary_dosage ? `
+                                <div class="dosage-item">
+                                    <span class="dosage-label">食疗用量：</span>
+                                    <span class="dosage-value">${item.dietary_dosage}</span>
+                                </div>
+                            ` : ''}
+                            ${item.medicinal_dosage ? `
+                                <div class="dosage-item">
+                                    <span class="dosage-label">药用用量：</span>
+                                    <span class="dosage-value">${item.medicinal_dosage}</span>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                     
                     ${item.contraindications ? `
@@ -793,13 +928,29 @@ class SimpleApp {
             
             // 添加返回按钮（如果有上级页面）
             if (this.previousDetailInfo) {
-                const backButton = `
-                    <button id="modal-back" class="btn btn-outline back-button" onclick="app.goBackToPreviousDetail()">
+                const backButton = document.createElement('div');
+                backButton.className = 'back-button-container';
+                backButton.innerHTML = `
+                    <button id="modal-back" class="btn btn-outline back-button">
                         <i class="fas fa-arrow-left"></i>
                         返回${this.previousDetailInfo.name}
                     </button>
                 `;
-                modalBody.innerHTML = backButton + content;
+                
+                modalBody.innerHTML = content;
+                modalBody.insertBefore(backButton, modalBody.firstChild);
+                
+                // 绑定返回按钮事件
+                const backBtn = document.getElementById('modal-back');
+                if (backBtn) {
+                    backBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.goBackToPreviousDetail();
+                    });
+                }
+            } else {
+                modalBody.innerHTML = content;
             }
             
             modal.classList.add('active');
@@ -1241,6 +1392,24 @@ const app = new SimpleApp();
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing app...');
     app.init();
+    
+    // 延迟检查和强制显示
+    setTimeout(() => {
+        console.log('🔍 延迟检查数据状态...');
+        if (window.dataManager && window.dataManager.isLoaded) {
+            console.log('✅ 数据已加载，强制显示常用食材');
+            app.displayPopularIngredients();
+        } else {
+            console.log('❌ 数据未加载，等待中...');
+            // 再次尝试初始化
+            if (window.dataManager) {
+                window.dataManager.initialize().then(() => {
+                    console.log('🔄 重新初始化完成，显示食材');
+                    app.displayPopularIngredients();
+                });
+            }
+        }
+    }, 2000);
 });
 
 // 导出

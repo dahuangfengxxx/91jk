@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相关配方测试 - 随息居</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=4">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=9">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+</head>
+<body class="light-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <h1>随息居</h1>
+                    <span class="subtitle">相关配方功能测试</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="fas fa-seedling fa-spin"></i>
+                    <p>正在加载数据...</p>
+                </div>
+            </div>
+
+            <!-- Test Instructions -->
+            <div class="card" style="margin-bottom: 20px;">
+                <h3>相关配方功能测试</h3>
+                <p>请搜索"胡萝卜"，然后点击详情查看相关配方模块是否正常显示。</p>
+                <p>预期应该显示：牛肉胡萝卜炖、土豆胡萝卜鸡茸羹、口蘑炒肉片等配方。</p>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form card">
+                <div class="search-grid">
+                    <div class="search-field span-2">
+                        <label for="global-search">关键词检索</label>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="global-search" placeholder="输入'胡萝卜'测试相关配方..." />
+                            <button id="search-btn" class="search-button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>检索结果</h3>
+                    <div class="results-controls">
+                        <span id="results-count" class="results-count">共找到 0 条结果</span>
+                    </div>
+                </div>
+                <div id="search-results" class="results-grid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="assets/js/config.js?v=5"></script>
+    <script src="assets/js/fixedDataManager.js?v=9"></script>
+    <script src="assets/js/simpleApp.js?v=9"></script>
+    
+    <script>
+        // 页面加载完成后自动搜索胡萝卜
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const searchInput = document.getElementById('global-search');
+                if (searchInput) {
+                    searchInput.value = '胡萝卜';
+                    const searchEvent = new Event('input');
+                    searchInput.dispatchEvent(searchEvent);
+                    
+                    // 1秒后自动点击第一个结果的详情按钮
+                    setTimeout(() => {
+                        const firstDetailButton = document.querySelector('.result-card .btn');
+                        if (firstDetailButton) {
+                            console.log('🎯 自动点击第一个详情按钮测试相关配方');
+                            firstDetailButton.click();
+                        }
+                    }, 1500);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

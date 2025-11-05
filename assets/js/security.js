@@ -38,15 +38,20 @@ class SecurityGuard {
         if (typeof window === 'undefined') return true;
         
         const hostname = window.location.hostname;
-        const isAllowed = this.allowedDomains.some(domain => 
-            hostname === domain || hostname.endsWith('.' + domain) || hostname.endsWith('.netlify.app')
-        );
+        console.log('🔍 检查域名:', hostname);
         
-        if (!isAllowed && hostname !== '') {
+        const isAllowed = this.allowedDomains.some(domain => 
+            hostname === domain || hostname.endsWith('.' + domain)
+        ) || hostname.endsWith('.netlify.app') || hostname === '' || hostname.includes('127.0.0.1');
+        
+        if (!isAllowed) {
             console.warn('🚨 未授权的域名访问:', hostname);
-            this.showSecurityWarning();
+            // 暂时注释掉安全警告，便于本地调试
+            // this.showSecurityWarning();
             return false;
         }
+        
+        console.log('✅ 域名验证通过:', hostname);
         return true;
     }
 

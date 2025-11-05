@@ -45,8 +45,19 @@ class CSVToJSONConverter {
 
             fs.createReadStream(csvPath)
                 .pipe(csv())
-                .on('data', (data) => results.push(data))
+                .on('data', (data) => {
+                    // 确保数据不为空
+                    if (data && Object.keys(data).length > 0) {
+                        results.push(data);
+                    }
+                })
                 .on('end', () => {
+                    console.log(`📊 Processing ${results.length} records from ${csvFileName}`);
+                    
+                    if (results.length === 0) {
+                        console.warn(`⚠️  No data found in ${csvFileName}`);
+                    }
+                    
                     // 对敏感数据进行混淆
                     const obfuscatedData = {
                         timestamp: Date.now(),
@@ -54,7 +65,7 @@ class CSVToJSONConverter {
                         data: this.obfuscate(JSON.stringify(results))
                     };
 
-                    fs.writeFileSync(jsonPath, JSON.stringify(obfuscatedData));
+                    fs.writeFileSync(jsonPath, JSON.stringify(obfuscatedData, null, 2));
                     console.log(`✅ Converted ${results.length} records to ${jsonFileName}`);
                     resolve(results.length);
                 })

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能测试 - 随息居</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=4">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=4">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-results {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 随息居功能测试页面</h1>
+        
+        <div class="test-section">
+            <h2>数据加载测试</h2>
+            <button class="test-button" onclick="testDataLoading()">测试数据加载状态</button>
+            <button class="test-button" onclick="testTomatoData()">查找西红柿数据</button>
+            <div id="data-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>UI功能测试</h2>
+            <button class="test-button" onclick="testShowDetails()">测试详情显示</button>
+            <button class="test-button" onclick="testPopularIngredients()">显示常用食材</button>
+            <div id="ui-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>实际数据显示</h2>
+            <div id="search-results" class="results-grid"></div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: flex;">
+        <div class="loading-spinner">
+            <p>正在加载数据...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/config.js?v=4"></script>
+    <script src="assets/js/secureDataManager.js?v=4"></script>
+    <script src="assets/js/simpleApp.js?v=4"></script>
+    
+    <script>
+        // 测试函数
+        async function testDataLoading() {
+            const results = document.getElementById('data-results');
+            results.textContent = '正在测试数据加载...\n';
+            
+            try {
+                if (window.dataManager) {
+                    results.textContent += `数据管理器状态: ${window.dataManager.isLoaded ? '已加载' : '未加载'}\n`;
+                    results.textContent += `食材数量: ${window.dataManager.ingredients?.length || 0}\n`;
+                    results.textContent += `配方数量: ${window.dataManager.recipes?.length || 0}\n`;
+                    
+                    if (!window.dataManager.isLoaded) {
+                        results.textContent += '尝试初始化数据管理器...\n';
+                        const success = await window.dataManager.initialize();
+                        results.textContent += `初始化结果: ${success ? '成功' : '失败'}\n`;
+                    }
+                } else {
+                    results.textContent += '错误: 数据管理器未找到\n';
+                }
+            } catch (error) {
+                results.textContent += `错误: ${error.message}\n`;
+            }
+        }
+        
+        function testTomatoData() {
+            const results = document.getElementById('data-results');
+            results.textContent = '正在查找西红柿数据...\n';
+            
+            if (window.dataManager && window.dataManager.ingredients) {
+                const tomato = window.dataManager.ingredients.find(item => item.name_zh === '西红柿');
+                if (tomato) {
+                    results.textContent += '✅ 找到西红柿数据:\n';
+                    results.textContent += JSON.stringify(tomato, null, 2);
+                } else {
+                    results.textContent += '❌ 未找到西红柿数据\n';
+                    results.textContent += '可用食材示例:\n';
+                    const samples = window.dataManager.ingredients.slice(0, 5).map(item => item.name_zh);
+                    results.textContent += samples.join(', ');
+                }
+            } else {
+                results.textContent += '❌ 数据管理器或食材数据未加载\n';
+            }
+        }
+        
+        function testShowDetails() {
+            const results = document.getElementById('ui-results');
+            results.textContent = '正在测试详情显示...\n';
+            
+            if (window.app) {
+                try {
+                    window.app.showDetails('西红柿', 'ingredient');
+                    results.textContent += '✅ 调用showDetails成功\n';
+                } catch (error) {
+                    results.textContent += `❌ 调用showDetails失败: ${error.message}\n`;
+                }
+            } else {
+                results.textContent += '❌ App实例未找到\n';
+            }
+        }
+        
+        function testPopularIngredients() {
+            const results = document.getElementById('ui-results');
+            results.textContent = '正在显示常用食材...\n';
+            
+            if (window.app) {
+                try {
+                    window.app.displayPopularIngredients();
+                    results.textContent += '✅ 调用displayPopularIngredients成功\n';
+                } catch (error) {
+                    results.textContent += `❌ 调用失败: ${error.message}\n`;
+                }
+            } else {
+                results.textContent += '❌ App实例未找到\n';
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🧪 测试页面加载完成');
+            
+            // 延迟初始化应用
+            setTimeout(async () => {
+                if (!window.app) {
+                    window.app = new SimpleApp();
+                    await window.app.init();
+                }
+                
+                // 自动运行数据加载测试
+                await testDataLoading();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
