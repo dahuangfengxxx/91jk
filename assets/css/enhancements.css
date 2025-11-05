@@ -38,6 +38,41 @@
     width: 100%;
 }
 
+/* 返回按钮样式 */
+.back-button {
+    margin-bottom: 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #334155;
+    transform: translateY(-1px);
+}
+
+.back-button i {
+    margin-right: 8px;
+    font-size: 0.9em;
+}
+
+/* 兼容性标签样式优化 */
+.compatibility-tag.good {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.compatibility-tag.bad {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
 /* 结果卡片样式 */
 .result-card {
     background: white;

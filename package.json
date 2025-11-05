@@ -20,8 +20,9 @@
   ],
   "author": "随息居团队",
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "csv-parser": "^3.2.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/your-username/suixiju-platform.git"

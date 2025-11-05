@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "endpoints": {
+    "ingredients": "/data/ingredients.json",
+    "recipes": "/data/recipes.json",
+    "recipeIngredients": "/data/recipe_ingredients.json"
+  },
+  "security": {
+    "requireReferer": true,
+    "rateLimit": {
+      "requests": 100,
+      "window": 3600000
+    }
+  },
+  "lastUpdated": "2025-11-05T08:15:16.695Z"
+}

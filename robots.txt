@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /assets/
+
+# 禁止访问敏感数据文件
+Disallow: /*.csv
+Disallow: /*.py
+Disallow: /__pycache__/
+Disallow: /scripts/
+Disallow: /ingredients_master.csv
+Disallow: /recipes_master.csv
+Disallow: /recipe_ingredients_master.csv
+Disallow: /recipe_ingredients_restructured.csv
+Disallow: /recipe_ingredients_summary.csv
+Disallow: /recipes_restructured.csv
+Disallow: /recipes_summary.csv
+Disallow: /ingredients_master_with_duplicates.csv
+
+# 允许访问JSON数据API（但不鼓励爬取）
+Allow: /data/*.json
+
+# 网站地图
+Sitemap: https://91jk.liyang2002.com/sitemap.xml

@@ -438,7 +438,27 @@ class SimpleApp {
         const type = isRecipe ? '配方' : '食材';
         const category = isRecipe ? '食疗配方' : (item.gate_category || '未分类');
         const description = isRecipe ? item.intent_tags : item.primary_functions;
-        const constitutions = isRecipe ? item.constitution_tags : item.constitutions_suitable;
+        
+        // 处理体质标签，避免重复显示
+        let constitutions = '';
+        if (isRecipe) {
+            constitutions = item.constitution_tags || '';
+        } else {
+            // 对于食材，合并 constitutions_suitable 和 constitution_tags，去重
+            const constitutionSources = [
+                item.constitutions_suitable || '',
+                item.constitution_tags || ''
+            ].filter(Boolean);
+            
+            if (constitutionSources.length > 0) {
+                const allConstitutions = constitutionSources.join(',').split(',')
+                    .map(c => c.trim())
+                    .filter(c => c && c !== '')
+                    .filter((c, index, arr) => arr.indexOf(c) === index); // 去重
+                constitutions = allConstitutions.join(',');
+            }
+        }
+        
         const seasons = item.seasonality || '';
         
         // 获取相宜相克信息（仅对食材显示）
@@ -520,6 +540,9 @@ class SimpleApp {
     showDetails(name, type) {
         let item;
         let content = '';
+        
+        // 存储当前详情信息，用于返回功能
+        this.currentDetailInfo = { name, type };
         
         if (type === 'recipe') {
             item = dataManager.recipes.find(r => r.title_zh === name);
@@ -603,7 +626,7 @@ class SimpleApp {
             if (item) {
                 const relatedRecipes = dataManager.getIngredientRecipes(name);
                 const recipesList = relatedRecipes.map(recipe => 
-                    `<div class="recipe-link" onclick="app.showDetails('${recipe.title_zh}', 'recipe')">${recipe.title_zh}</div>`
+                    `<div class="recipe-link" onclick="app.showRelatedRecipe('${recipe.title_zh}', 'recipe')">${recipe.title_zh}</div>`
                 ).join('');
                 
                 // 相宜相克信息
@@ -678,7 +701,9 @@ class SimpleApp {
                             <h4>适用体质</h4>
                         </div>
                         <div class="constitution-tags">
-                            ${item.constitutions_suitable ? item.constitutions_suitable.split(',').map(constitution => `<span class="constitution-tag">${constitution.trim()}</span>`).join('') : '<span class="no-data">暂无信息</span>'}
+                            ${this.getUniqueConstitutions(item).length > 0 ? 
+                                this.getUniqueConstitutions(item).map(constitution => `<span class="constitution-tag">${constitution}</span>`).join('') : 
+                                '<span class="no-data">暂无信息</span>'}
                         </div>
                     </div>
                     
@@ -735,6 +760,26 @@ class SimpleApp {
     }
 
     /**
+     * 显示相关配方（从食材详情页跳转）
+     */  
+    showRelatedRecipe(name, type) {
+        // 存储来源信息以便返回
+        this.previousDetailInfo = this.currentDetailInfo;
+        this.showDetails(name, type);
+    }
+
+    /**
+     * 返回上级详情页
+     */
+    goBackToPreviousDetail() {
+        if (this.previousDetailInfo) {
+            const prevInfo = this.previousDetailInfo;
+            this.previousDetailInfo = null; // 清除返回历史
+            this.showDetails(prevInfo.name, prevInfo.type);
+        }
+    }
+
+    /**
      * 显示模态框
      */
     showModal(title, content) {
@@ -745,20 +790,53 @@ class SimpleApp {
         if (modal && modalTitle && modalBody) {
             modalTitle.textContent = title;
             modalBody.innerHTML = content;
+            
+            // 添加返回按钮（如果有上级页面）
+            if (this.previousDetailInfo) {
+                const backButton = `
+                    <button id="modal-back" class="btn btn-outline back-button" onclick="app.goBackToPreviousDetail()">
+                        <i class="fas fa-arrow-left"></i>
+                        返回${this.previousDetailInfo.name}
+                    </button>
+                `;
+                modalBody.innerHTML = backButton + content;
+            }
+            
             modal.classList.add('active');
             
             // 绑定关闭事件
             const closeButtons = modal.querySelectorAll('.modal-close');
             closeButtons.forEach(btn => {
-                btn.onclick = () => modal.classList.remove('active');
+                btn.onclick = () => {
+                    modal.classList.remove('active');
+                    // 清除返回历史
+                    this.previousDetailInfo = null;
+                };
             });
             
             // 点击背景关闭
             modal.onclick = (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('active');
+                    // 清除返回历史
+                    this.previousDetailInfo = null;
                 }
             };
+
+            // 添加键盘事件支持
+            const handleKeyPress = (e) => {
+                if (e.key === 'Escape') {
+                    modal.classList.remove('active');
+                    this.previousDetailInfo = null;
+                    document.removeEventListener('keydown', handleKeyPress);
+                } else if (e.key === 'Backspace' && this.previousDetailInfo) {
+                    e.preventDefault();
+                    this.goBackToPreviousDetail();
+                    document.removeEventListener('keydown', handleKeyPress);
+                }
+            };
+            
+            document.addEventListener('keydown', handleKeyPress);
         }
     }
 
@@ -1114,6 +1192,25 @@ class SimpleApp {
         if (countElement) {
             countElement.textContent = `共找到 ${recipes.length} 个配方`;
         }
+    }
+
+    /**
+     * 获取去重后的体质标签
+     */
+    getUniqueConstitutions(item) {
+        const constitutionSources = [
+            item.constitutions_suitable || '',
+            item.constitution_tags || ''
+        ].filter(Boolean);
+        
+        if (constitutionSources.length === 0) return [];
+        
+        const allConstitutions = constitutionSources.join(',').split(',')
+            .map(c => c.trim())
+            .filter(c => c && c !== '')
+            .filter((c, index, arr) => arr.indexOf(c) === index); // 去重
+            
+        return allConstitutions;
     }
 
     /**

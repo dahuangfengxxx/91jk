@@ -1,0 +1,94 @@
+# Netlify配置文件 - 网站安全设置
+
+# 重定向规则 - 阻止直接访问CSV文件
+[[redirects]]
+  from = "/*.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/ingredients_master.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/recipes_master.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/recipe_ingredients_*.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# 保护Python脚本和数据处理文件
+[[redirects]]
+  from = "/*.py"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/__pycache__/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# API数据访问控制 - 带有速率限制
+[[redirects]]
+  from = "/data/*"
+  to = "/data/:splat"
+  status = 200
+  headers = {X-Frame-Options = "DENY", X-Content-Type-Options = "nosniff", Referrer-Policy = "strict-origin-when-cross-origin"}
+  conditions = {Role = ["public"]}
+
+# 主页面重定向
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+# HTTP安全头部设置
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    
+[[headers]]
+  for = "/data/*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    X-Robots-Tag = "noindex, nofollow"
+    Content-Security-Policy = "default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'"
+
+[[headers]]
+  for = "/*.csv"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet"
+
+# 构建设置
+[build]
+  publish = "."
+  command = "echo 'Build completed'"
+
+# 插件配置 - 安全扫描
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
+# 环境变量（在Netlify面板中设置）
+# SITE_SECURITY_KEY=your-secret-key
+# ALLOWED_DOMAINS=91jk.liyang2002.com,localhost
