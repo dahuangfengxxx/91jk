@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上调试 - 随息居</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=4">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=10">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="light-theme">
+    <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+        <h2>🔍 线上调试工具</h2>
+        
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h3>数据加载状态</h3>
+            <div id="status" style="font-family: monospace;">正在检测...</div>
+        </div>
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h3>胡萝卜相关配方测试</h3>
+            <div id="carrot-test" style="font-family: monospace;">等待测试...</div>
+        </div>
+        
+        <button onclick="runTest()" style="background: #22c55e; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+            🧪 运行测试
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script>
+        let testDataManager = null;
+        
+        // 简化的数据管理器
+        class SimpleTestDataManager {
+            constructor() {
+                this.ingredients = [];
+                this.recipes = [];
+                this.recipeIngredients = [];
+                this.isLoaded = false;
+            }
+            
+            async initialize() {
+                try {
+                    document.getElementById('status').innerHTML = '📡 正在加载数据...';
+                    
+                    // 加载食材数据
+                    const ingredientsRes = await fetch('ingredients_master.csv');
+                    const ingredientsText = await ingredientsRes.text();
+                    
+                    Papa.parse(ingredientsText, {
+                        header: true,
+                        complete: (results) => {
+                            this.ingredients = results.data.filter(row => row.name_zh);
+                            this.updateStatus(`✅ 食材: ${this.ingredients.length} 条`);
+                        }
+                    });
+                    
+                    // 加载配方数据
+                    const recipesRes = await fetch('recipes_master.csv');
+                    const recipesText = await recipesRes.text();
+                    
+                    Papa.parse(recipesText, {
+                        header: true,
+                        complete: (results) => {
+                            this.recipes = results.data.filter(row => row.title_zh);
+                            this.updateStatus(`✅ 配方: ${this.recipes.length} 条`);
+                        }
+                    });
+                    
+                    // 加载配方食材关系
+                    const recipeIngredientsRes = await fetch('recipe_ingredients_restructured.csv');
+                    const recipeIngredientsText = await recipeIngredientsRes.text();
+                    
+                    Papa.parse(recipeIngredientsText, {
+                        header: true,
+                        complete: (results) => {
+                            this.recipeIngredients = results.data.filter(row => row['菜谱名称']);
+                            this.updateStatus(`✅ 配方食材关系: ${this.recipeIngredients.length} 条`);
+                            this.isLoaded = true;
+                        }
+                    });
+                    
+                } catch (error) {
+                    this.updateStatus(`❌ 加载失败: ${error.message}`);
+                }
+            }
+            
+            updateStatus(message) {
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML += '<br>' + message;
+            }
+            
+            getIngredientRecipes(ingredientName) {
+                if (!this.isLoaded) {
+                    return [];
+                }
+                
+                const relatedRecipeNames = [];
+                
+                this.recipeIngredients.forEach(recipeRecord => {
+                    const recipeName = recipeRecord['菜谱名称'];
+                    if (!recipeName) return;
+                    
+                    // 检查所有配料字段
+                    for (let i = 1; i <= 10; i++) {
+                        const ingredientField = `配料${i}_名称`;
+                        const ingredient = recipeRecord[ingredientField];
+                        
+                        if (ingredient && ingredient.includes(ingredientName)) {
+                            if (!relatedRecipeNames.includes(recipeName)) {
+                                relatedRecipeNames.push(recipeName);
+                            }
+                            break;
+                        }
+                    }
+                });
+                
+                return this.recipes.filter(recipe => 
+                    relatedRecipeNames.includes(recipe.title_zh)
+                );
+            }
+        }
+        
+        async function runTest() {
+            if (!testDataManager) {
+                testDataManager = new SimpleTestDataManager();
+                await testDataManager.initialize();
+                
+                // 等待数据加载完成
+                setTimeout(() => {
+                    testCarrotRecipes();
+                }, 2000);
+            } else {
+                testCarrotRecipes();
+            }
+        }
+        
+        function testCarrotRecipes() {
+            const testEl = document.getElementById('carrot-test');
+            
+            if (!testDataManager.isLoaded) {
+                testEl.innerHTML = '⚠️ 数据尚未完全加载';
+                return;
+            }
+            
+            const carrotRecipes = testDataManager.getIngredientRecipes('胡萝卜');
+            
+            testEl.innerHTML = `
+                <div>🥕 测试食材: 胡萝卜</div>
+                <div>📋 找到配方数量: ${carrotRecipes.length}</div>
+                ${carrotRecipes.map((recipe, index) => 
+                    `<div>📝 ${index + 1}. ${recipe.title_zh}</div>`
+                ).join('')}
+                <br>
+                <div>📊 调试信息:</div>
+                <div>- 配方食材记录总数: ${testDataManager.recipeIngredients.length}</div>
+                <div>- 食材总数: ${testDataManager.ingredients.length}</div>
+                <div>- 配方总数: ${testDataManager.recipes.length}</div>
+            `;
+        }
+        
+        // 页面加载时自动运行
+        window.onload = () => {
+            runTest();
+        };
+    </script>
+</body>
+</html>

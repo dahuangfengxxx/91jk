@@ -701,7 +701,16 @@ class SimpleApp {
             item = dataManager.ingredients.find(i => i.name_zh === name);
             if (item) {
                 const relatedRecipes = dataManager.getIngredientRecipes(name);
-                console.log(`🍽️ ${name} 相关配方数量:`, relatedRecipes.length);
+                console.log(`🍽️ ${name} 相关配方查询结果:`, {
+                    找到配方数量: relatedRecipes.length,
+                    配方列表: relatedRecipes.map(r => r.title_zh || r['菜谱名称']),
+                    数据管理器状态: {
+                        配方食材记录数: dataManager.recipeIngredients ? dataManager.recipeIngredients.length : 0,
+                        配方总数: dataManager.recipes ? dataManager.recipes.length : 0,
+                        是否已加载: dataManager.isLoaded
+                    }
+                });
+                
                 const recipesList = relatedRecipes.map(recipe => {
                     const recipeTitle = recipe.title_zh || recipe['菜谱名称'] || recipe.name;
                     return `<div class="recipe-link" onclick="window.app.showRelatedRecipe('${recipeTitle.replace(/'/g, "\\'")}', 'recipe'); event.stopPropagation();">${recipeTitle}</div>`;
@@ -862,17 +871,16 @@ class SimpleApp {
                         </div>
                     ` : ''}
                     
-                    ${relatedRecipes.length > 0 ? `
-                        <div class="detail-section">
-                            <div class="section-header">
-                                <i class="fas fa-utensils"></i>
-                                <h4>相关配方</h4>
-                            </div>
-                            <div class="recipes-grid">
-                                ${recipesList}
-                            </div>
+                    <!-- 相关配方模块 - 始终显示 -->
+                    <div class="detail-section">
+                        <div class="section-header">
+                            <i class="fas fa-utensils"></i>
+                            <h4>相关配方</h4>
                         </div>
-                    ` : ''}
+                        <div class="recipes-grid">
+                            ${relatedRecipes.length > 0 ? recipesList : '<div class="no-data">暂无相关配方数据</div>'}
+                        </div>
+                    </div>
                     
                     ${item.modern_notes ? `
                         <div class="detail-section">
