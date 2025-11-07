@@ -45,7 +45,11 @@
                     document.getElementById('status').innerHTML = '📡 正在加载数据...';
                     
                     // 加载食材数据
-                    const ingredientsRes = await fetch('ingredients_master.csv');
+                    let ingredientsRes = await fetch('/api/data/ingredients');
+                    if (!ingredientsRes.ok) {
+                        console.warn('API失败，尝试直接访问CSV');
+                        ingredientsRes = await fetch('ingredients_master.csv');
+                    }
                     const ingredientsText = await ingredientsRes.text();
                     
                     Papa.parse(ingredientsText, {
@@ -57,7 +61,11 @@
                     });
                     
                     // 加载配方数据
-                    const recipesRes = await fetch('recipes_master.csv');
+                    let recipesRes = await fetch('/api/data/recipes');
+                    if (!recipesRes.ok) {
+                        console.warn('API失败，尝试直接访问CSV');
+                        recipesRes = await fetch('recipes_master.csv');
+                    }
                     const recipesText = await recipesRes.text();
                     
                     Papa.parse(recipesText, {
@@ -69,7 +77,11 @@
                     });
                     
                     // 加载配方食材关系
-                    const recipeIngredientsRes = await fetch('recipe_ingredients_restructured.csv');
+                    let recipeIngredientsRes = await fetch('/api/data/recipe-ingredients');
+                    if (!recipeIngredientsRes.ok) {
+                        console.warn('API失败，尝试直接访问CSV');
+                        recipeIngredientsRes = await fetch('recipe_ingredients_restructured.csv');
+                    }
                     const recipeIngredientsText = await recipeIngredientsRes.text();
                     
                     Papa.parse(recipeIngredientsText, {

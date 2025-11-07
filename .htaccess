@@ -1,0 +1,23 @@
+# 阻止直接访问CSV文件
+<Files "*.csv">
+    Order Allow,Deny
+    Deny from all
+    # 只允许来自同一域名的请求
+    SetEnvIf Referer "^https://91jk\.liyang2002\.com" local_referal
+    SetEnvIf Referer "^http://localhost" local_referal
+    Allow from env=local_referal
+</Files>
+
+# 阻止下载工具的User-Agent
+RewriteEngine On
+RewriteCond %{HTTP_USER_AGENT} ^.*IDM|FDM|FlashGet|JetCar|MetaProducts|GetRight|Offline|WebZIP.*$ [NC]
+RewriteRule ^.*\.csv$ /404.html [L,R=404]
+
+# 防止目录浏览
+Options -Indexes
+
+# 阻止访问敏感文件
+<Files ~ "^\.">
+    Order allow,deny
+    Deny from all
+</Files>

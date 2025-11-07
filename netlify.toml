@@ -1,7 +1,51 @@
-# Netlify配置文件 - 优化版安全设置
+# Netlify配置文件 - 强化安全设置
 
-# 注意：暂时允许CSV文件访问以确保网站正常运行
-# 如需加强安全性，可后续实施数据API化方案
+# 阻止直接下载CSV文件 - 防止IDM等下载工具抓取
+[[redirects]]
+  from = "/*.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/ingredients_master.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/recipes_master.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/recipe_ingredients_*.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# 只允许特定Referer访问CSV文件（网站内部使用）
+[[redirects]]
+  from = "/api/data/ingredients"
+  to = "/ingredients_master.csv"
+  status = 200
+  conditions = {Role = ["public"]}
+  headers = {X-Robots-Tag = "noindex, nofollow"}
+
+[[redirects]]
+  from = "/api/data/recipes" 
+  to = "/recipes_master.csv"
+  status = 200
+  conditions = {Role = ["public"]}
+  headers = {X-Robots-Tag = "noindex, nofollow"}
+
+[[redirects]]
+  from = "/api/data/recipe-ingredients"
+  to = "/recipe_ingredients_restructured.csv"
+  status = 200
+  conditions = {Role = ["public"]}
+  headers = {X-Robots-Tag = "noindex, nofollow"}
 
 # 保护敏感文件
 [[redirects]]
