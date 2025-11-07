@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上调试 - 随息居</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=4">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=9">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+</head>
+<body class="light-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <h1>随息居</h1>
+                    <span class="subtitle">线上调试版</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="fas fa-seedling fa-spin"></i>
+                    <p>正在加载数据...</p>
+                </div>
+            </div>
+
+            <!-- Debug Info -->
+            <div class="card" style="margin-bottom: 20px; background: #f0f9ff; border: 1px solid #0ea5e9;">
+                <h3>🔍 调试信息</h3>
+                <div id="debug-info">
+                    <p>等待数据加载...</p>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form card">
+                <div class="search-grid">
+                    <div class="search-field span-2">
+                        <label for="global-search">关键词检索</label>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="global-search" placeholder="输入'胡萝卜'测试相关配方功能..." />
+                            <button id="search-btn" class="search-button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>检索结果</h3>
+                    <div class="results-controls">
+                        <span id="results-count" class="results-count">共找到 0 条结果</span>
+                    </div>
+                </div>
+                <div id="search-results" class="results-grid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="assets/js/config.js?v=9"></script>
+    <script src="assets/js/fixedDataManager.js?v=9"></script>
+    <script src="assets/js/simpleApp.js?v=9"></script>
+    
+    <script>
+        // 增强调试功能
+        window.addEventListener('load', () => {
+            console.log('🚀 页面加载完成，开始调试检查...');
+            
+            // 创建调试信息更新函数
+            function updateDebugInfo() {
+                const debugDiv = document.getElementById('debug-info');
+                if (!debugDiv) return;
+                
+                const info = [];
+                
+                // 检查数据管理器
+                if (window.dataManager) {
+                    info.push(`✅ 数据管理器已创建`);
+                    info.push(`📊 食材数量: ${window.dataManager.ingredients ? window.dataManager.ingredients.length : 0}`);
+                    info.push(`🍽️ 配方数量: ${window.dataManager.recipes ? window.dataManager.recipes.length : 0}`);
+                    info.push(`🔗 配方食材关系: ${window.dataManager.recipeIngredients ? window.dataManager.recipeIngredients.length : 0}`);
+                    info.push(`⚡ 加载状态: ${window.dataManager.isLoaded ? '✅ 已加载' : '⏳ 加载中'}`);
+                    
+                    // 测试胡萝卜相关配方
+                    if (window.dataManager.isLoaded) {
+                        try {
+                            const carrotRecipes = window.dataManager.getIngredientRecipes('胡萝卜');
+                            info.push(`🥕 胡萝卜相关配方: ${carrotRecipes.length} 个`);
+                            if (carrotRecipes.length > 0) {
+                                info.push(`📋 配方列表: ${carrotRecipes.map(r => r.title_zh || r['菜谱名称']).join(', ')}`);
+                            }
+                        } catch (error) {
+                            info.push(`❌ 获取胡萝卜配方失败: ${error.message}`);
+                        }
+                    }
+                } else {
+                    info.push(`❌ 数据管理器未创建`);
+                }
+                
+                // 检查Papa Parse
+                info.push(`📦 Papa Parse: ${window.Papa ? '✅ 已加载' : '❌ 未加载'}`);
+                
+                debugDiv.innerHTML = info.map(item => `<p>${item}</p>`).join('');
+            }
+            
+            // 定期更新调试信息
+            const debugInterval = setInterval(updateDebugInfo, 1000);
+            
+            // 10秒后停止更新
+            setTimeout(() => {
+                clearInterval(debugInterval);
+                updateDebugInfo(); // 最后更新一次
+                
+                // 自动搜索胡萝卜
+                const searchInput = document.getElementById('global-search');
+                if (searchInput) {
+                    searchInput.value = '胡萝卜';
+                    const searchEvent = new Event('input');
+                    searchInput.dispatchEvent(searchEvent);
+                    
+                    // 自动点击第一个详情按钮
+                    setTimeout(() => {
+                        const firstDetailButton = document.querySelector('.result-card .btn');
+                        if (firstDetailButton) {
+                            console.log('🎯 自动点击胡萝卜详情');
+                            firstDetailButton.click();
+                        }
+                    }, 2000);
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

@@ -65,8 +65,26 @@
     margin: 10px 0;
     padding: 8px;
     background: #f8fafc;
-    border-radius: 4px;
+    border-radius: 8px;
     border-left: 3px solid #22c55e;
+}
+
+/* 增强卡片圆角效果 */
+.result-card {
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.card {
+    border-radius: 12px !important;
+}
+
+.ingredient-card {
+    border-radius: 8px !important;
+}
+
+.recipe-link {
+    border-radius: 8px !important;
 }
 
 .property-item {

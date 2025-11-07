@@ -291,7 +291,7 @@ class SimpleDataManagerFixed {
             
             // 检查所有配料字段
             for (let i = 1; i <= 10; i++) {
-                const ingredientField = `配料${i}_名称` || `ingredient_${i}_name`;
+                const ingredientField = `配料${i}_名称`;  // 修复：移除错误的 || 语法
                 const ingredient = recipeRecord[ingredientField];
                 
                 if (ingredient && ingredient.includes(ingredientName)) {

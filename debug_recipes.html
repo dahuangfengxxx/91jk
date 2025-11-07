@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相关配方调试 - 随息居</title>
+    <link rel="stylesheet" href="assets/css/styles.css?v=4">
+    <link rel="stylesheet" href="assets/css/enhancements.css?v=10">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+</head>
+<body class="light-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <h1>随息居</h1>
+                    <span class="subtitle">相关配方调试版</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Debug Panel -->
+            <div class="card" style="margin-bottom: 20px; border-radius: 12px;">
+                <h3>🔍 调试信息</h3>
+                <div id="debug-info" style="background: #f8fafc; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.9em;">
+                    <div>正在加载调试信息...</div>
+                </div>
+                <button id="test-btn" class="btn btn-primary" style="margin-top: 12px;">
+                    <i class="fas fa-play"></i>
+                    测试胡萝卜相关配方
+                </button>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="fas fa-seedling fa-spin"></i>
+                    <p>正在加载数据...</p>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form card" style="border-radius: 12px;">
+                <div class="search-grid">
+                    <div class="search-field span-2">
+                        <label for="global-search">关键词检索</label>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="global-search" placeholder="输入'胡萝卜'测试相关配方..." />
+                            <button id="search-btn" class="search-button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>检索结果</h3>
+                    <div class="results-controls">
+                        <span id="results-count" class="results-count">共找到 0 条结果</span>
+                    </div>
+                </div>
+                <div id="search-results" class="results-grid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="assets/js/config.js?v=9"></script>
+    <script src="assets/js/fixedDataManager.js?v=10"></script>
+    <script src="assets/js/simpleApp.js?v=10"></script>
+    
+    <script>
+        // 调试功能
+        let debugDataManager = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const debugInfo = document.getElementById('debug-info');
+            const testBtn = document.getElementById('test-btn');
+            
+            // 初始化数据管理器
+            try {
+                debugDataManager = new FixedDataManager();
+                await debugDataManager.initialize();
+                
+                // 显示数据加载状态
+                debugInfo.innerHTML = `
+                    <div style="color: green;">✅ 数据管理器初始化完成</div>
+                    <div>📊 食材数量: ${debugDataManager.ingredients.length}</div>
+                    <div>🍽️ 配方数量: ${debugDataManager.recipes.length}</div>
+                    <div>🔗 配方食材关系: ${debugDataManager.recipeIngredients.length}</div>
+                `;
+                
+                // 测试按钮功能
+                testBtn.onclick = () => {
+                    testCarrotRecipes();
+                };
+                
+                // 自动搜索胡萝卜
+                setTimeout(() => {
+                    const searchInput = document.getElementById('global-search');
+                    if (searchInput) {
+                        searchInput.value = '胡萝卜';
+                        const searchEvent = new Event('input');
+                        searchInput.dispatchEvent(searchEvent);
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                debugInfo.innerHTML = `<div style="color: red;">❌ 初始化失败: ${error.message}</div>`;
+            }
+        });
+        
+        function testCarrotRecipes() {
+            const debugInfo = document.getElementById('debug-info');
+            
+            if (!debugDataManager) {
+                debugInfo.innerHTML += '<div style="color: red;">❌ 数据管理器未初始化</div>';
+                return;
+            }
+            
+            // 测试胡萝卜相关配方
+            const carrotRecipes = debugDataManager.getIngredientRecipes('胡萝卜');
+            
+            debugInfo.innerHTML += `
+                <div style="margin-top: 12px; padding: 8px; background: #e0f2fe; border-radius: 4px;">
+                    <div style="font-weight: bold; color: #0369a1;">🥕 胡萝卜相关配方测试:</div>
+                    <div>找到配方数量: ${carrotRecipes.length}</div>
+                    ${carrotRecipes.map((recipe, index) => 
+                        `<div>📝 ${index + 1}. ${recipe.title_zh || recipe['菜谱名称'] || '未知配方'}</div>`
+                    ).join('')}
+                </div>
+            `;
+            
+            // 测试配方食材数据结构
+            if (debugDataManager.recipeIngredients.length > 0) {
+                const firstRecord = debugDataManager.recipeIngredients[0];
+                const keys = Object.keys(firstRecord);
+                
+                debugInfo.innerHTML += `
+                    <div style="margin-top: 12px; padding: 8px; background: #fef3c7; border-radius: 4px;">
+                        <div style="font-weight: bold; color: #92400e;">📋 配方食材数据结构:</div>
+                        <div style="font-size: 0.8em;">${keys.slice(0, 10).join(', ')}...</div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
