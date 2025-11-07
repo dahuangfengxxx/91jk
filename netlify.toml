@@ -1,31 +1,9 @@
-# Netlify配置文件 - 网站安全设置
+# Netlify配置文件 - 优化版安全设置
 
-# 重定向规则 - 阻止直接访问CSV文件
-[[redirects]]
-  from = "/*.csv"
-  to = "/404.html"
-  status = 404
-  force = true
+# 注意：暂时允许CSV文件访问以确保网站正常运行
+# 如需加强安全性，可后续实施数据API化方案
 
-[[redirects]]
-  from = "/ingredients_master.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/recipes_master.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/recipe_ingredients_*.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-# 保护Python脚本和数据处理文件
+# 保护敏感文件
 [[redirects]]
   from = "/*.py"
   to = "/404.html"
@@ -44,15 +22,7 @@
   status = 404
   force = true
 
-# API数据访问控制 - 带有速率限制
-[[redirects]]
-  from = "/data/*"
-  to = "/data/:splat"
-  status = 200
-  headers = {X-Frame-Options = "DENY", X-Content-Type-Options = "nosniff", Referrer-Policy = "strict-origin-when-cross-origin"}
-  conditions = {Role = ["public"]}
-
-# 主页面重定向
+# 主页面设置
 [[redirects]]
   from = "/"
   to = "/index.html"
