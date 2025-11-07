@@ -230,7 +230,9 @@ class SimpleApp {
      */
     createBasicIngredientCard(name) {
         return `
-            <div class="result-card" data-type="ingredient" data-name="${name}">
+            <div class="result-card" data-type="ingredient" data-name="${name}" 
+                 onclick="window.app.showDetails('${name.replace(/'/g, "\\'")}', 'ingredient'); return false;"
+                 style="cursor: pointer;">
                 <div class="card-header">
                     <h3 class="card-title">${name}</h3>
                     <span class="card-type">食材</span>
@@ -242,12 +244,12 @@ class SimpleApp {
                     </p>
                     <p class="card-description">暂无详细信息</p>
                 </div>
-                <div class="card-actions" onclick="event.stopPropagation()">
-                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${name.replace(/'/g, "\\'")}', 'ingredient'); event.stopPropagation();">
+                <div class="card-actions" onclick="event.stopPropagation(); return false;">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${name.replace(/'/g, "\\'")}', 'ingredient'); event.stopPropagation(); return false;">
                         <i class="fas fa-eye"></i>
                         查看详情
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${name.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${name.replace(/'/g, "\\'")}'); event.stopPropagation(); return false;">
                         <i class="fas fa-heart"></i>
                         收藏
                     </button>
@@ -518,7 +520,9 @@ class SimpleApp {
         }
         
         return `
-            <div class="result-card" data-type="${isRecipe ? 'recipe' : 'ingredient'}" data-name="${title}">
+            <div class="result-card" data-type="${isRecipe ? 'recipe' : 'ingredient'}" data-name="${title}" 
+                 onclick="window.app.showDetails('${title.replace(/'/g, "\\'")}', '${isRecipe ? 'recipe' : 'ingredient'}'); return false;"
+                 style="cursor: pointer;">
                 <div class="card-header">
                     <h3 class="card-title">${title}</h3>
                     <span class="card-type">${type}</span>
@@ -559,12 +563,12 @@ class SimpleApp {
                     ` : ''}
                     ${compatibilityHtml}
                 </div>
-                <div class="card-actions" onclick="event.stopPropagation()">
-                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${title.replace(/'/g, "\\'")}', '${isRecipe ? 'recipe' : 'ingredient'}'); event.stopPropagation();">
+                <div class="card-actions" onclick="event.stopPropagation(); return false;">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.showDetails('${title.replace(/'/g, "\\'")}', '${isRecipe ? 'recipe' : 'ingredient'}'); event.stopPropagation(); return false;">
                         <i class="fas fa-eye"></i>
                         查看详情
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${title.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                    <button class="btn btn-outline btn-sm" onclick="window.app.toggleFavorite('${title.replace(/'/g, "\\'")}'); event.stopPropagation(); return false;">
                         <i class="fas fa-heart"></i>
                         收藏
                     </button>

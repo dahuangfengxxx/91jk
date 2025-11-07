@@ -73,6 +73,14 @@
 .result-card {
     border-radius: 12px !important;
     overflow: hidden;
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #22c55e;
 }
 
 .card {
