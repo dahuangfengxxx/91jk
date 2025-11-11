@@ -68,26 +68,18 @@ class SimpleDataManagerFixed {
         }
 
         const files = [
-            { url: '/api/data/ingredients', key: 'ingredients' },
-            { url: '/api/data/recipes', key: 'recipes' },
-            { url: '/api/data/recipe-ingredients', key: 'recipeIngredients' }
+            { url: 'ingredients_master.csv', key: 'ingredients' },
+            { url: 'recipes_master.csv', key: 'recipes' },
+            { url: 'recipe_ingredients_restructured.csv', key: 'recipeIngredients' }
         ];
 
         for (const file of files) {
             try {
-                let response = await fetch(file.url);
-                
-                // 如果API端点失败，尝试直接访问CSV文件（本地开发）
-                if (!response.ok && file.url.startsWith('/api/data/')) {
-                    const fallbackUrls = {
-                        '/api/data/ingredients': 'ingredients_master.csv',
-                        '/api/data/recipes': 'recipes_master.csv',
-                        '/api/data/recipe-ingredients': 'recipe_ingredients_restructured.csv'
-                    };
-                    console.warn(`API端点 ${file.url} 失败，尝试降级到直接文件访问`);
-                    response = await fetch(fallbackUrls[file.url]);
+                const response = await fetch(file.url);
+                if (!response.ok) {
+                    console.warn(`⚠️ 加载 ${file.url} 失败: ${response.status}`);
+                    continue;
                 }
-                
                 const text = await response.text();
                 
                 await new Promise((resolve, reject) => {

@@ -1,51 +1,7 @@
-# Netlify配置文件 - 强化安全设置
+# Netlify配置文件 - 平衡安全性和功能性
 
-# 阻止直接下载CSV文件 - 防止IDM等下载工具抓取
-[[redirects]]
-  from = "/*.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/ingredients_master.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/recipes_master.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-[[redirects]]
-  from = "/recipe_ingredients_*.csv"
-  to = "/404.html"
-  status = 404
-  force = true
-
-# 只允许特定Referer访问CSV文件（网站内部使用）
-[[redirects]]
-  from = "/api/data/ingredients"
-  to = "/ingredients_master.csv"
-  status = 200
-  conditions = {Role = ["public"]}
-  headers = {X-Robots-Tag = "noindex, nofollow"}
-
-[[redirects]]
-  from = "/api/data/recipes" 
-  to = "/recipes_master.csv"
-  status = 200
-  conditions = {Role = ["public"]}
-  headers = {X-Robots-Tag = "noindex, nofollow"}
-
-[[redirects]]
-  from = "/api/data/recipe-ingredients"
-  to = "/recipe_ingredients_restructured.csv"
-  status = 200
-  conditions = {Role = ["public"]}
-  headers = {X-Robots-Tag = "noindex, nofollow"}
+# 临时允许CSV文件访问以确保网站功能正常
+# 但添加安全头部限制批量下载
 
 # 保护敏感文件
 [[redirects]]
@@ -93,6 +49,10 @@
   for = "/*.csv"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet"
+    Cache-Control = "private, no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+    Content-Disposition = "inline; filename=data.txt"
 
 # 构建设置
 [build]
